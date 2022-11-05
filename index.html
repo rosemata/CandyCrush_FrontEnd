@@ -1,0 +1,400 @@
+<!--
+CandyCrush
+Your Name: Roselle Mata
+Collaborators: Roselle Mata
+-->
+<!DOCTYPE html>
+<html>
+<!--
+/* Copyright (c) 2017 MIT 6.813/6.831 course staff, all rights reserved.
+ * Redistribution of original or derived work requires permission of course staff.
+ */
+-->
+
+<head>
+<meta charset="utf-8">
+<title>CandyCrush</title>
+
+<!-- Load style sheets -->
+<link rel="stylesheet" href=
+  "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css">
+
+<link rel="stylesheet" href="mainLayout.css">
+
+<!-- Use mobile-aware viewport -->
+<meta name="viewport" content=
+  "width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Load any supplemental Javascript libraries here -->
+<script src=
+  "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src=
+  "https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.2/seedrandom.js">
+</script>
+<script src="candy.js"></script>
+<script src="board.js"></script>
+<script src="rules.js"></script>
+
+<script>
+
+// By default, the first board loaded by your page will be the same 
+// each time you load (which is accomplished by "seeding" the random
+// number generator. This makes testing (and grading!) easier!
+Math.seedrandom(0);
+
+
+// A short jQuery extension to read query parameters from the URL.
+$.extend({
+  getUrlVars: function() {
+    var vars = [], pair;
+    var pairs = window.location.search.substr(1).split('&');
+    for (var i = 0; i < pairs.length; i++) {
+      pair = pairs[i].split('=');
+      vars.push(pair[0]);
+      vars[pair[0]] = pair[1] &&
+          decodeURIComponent(pair[1].replace(/\+/g, ' '));
+    }
+    return vars;
+  },
+  getUrlVar: function(name) {
+    return $.getUrlVars()[name];
+  }
+});
+
+// constants
+var DEFAULT_BOARD_SIZE = 8;
+
+// data model at global scope for easier debugging
+var board;
+var rules;
+
+// initialize board
+if ($.getUrlVar('size') && $.getUrlVar('size') >= 3) {
+  board = new Board($.getUrlVar('size'));
+} else {
+  board = new Board(DEFAULT_BOARD_SIZE);
+}
+
+// load a rule
+rules = new Rules(board);
+
+/*
+helper for ready
+*/
+
+function startNewGame(){
+  board.clear();
+  rules.prepareNewGame();
+  disable_button("all")
+}
+
+// Final initialization entry point: the Javascript code inside this block
+// runs at the end of start-up when the page has finished loading.
+$(document).ready(function()
+{
+
+  /*
+  initialize a empty board table
+  */
+
+  $('#game_board').empty();
+  
+  for(var i = 0; i < 8; i++){
+    var row = document.createElement('tr');
+    $('#game_board').append(row);
+    for(var j = 0; j < 8; j++){
+      row.append(document.createElement('td'));
+    }
+  }
+  startNewGame();
+  
+});
+
+
+/* Event Handlers */
+// access the candy object with info.candy
+
+// add a candy to the board
+$(board).on('add', function(e, info)
+{
+  var curCandy = document.createElement('div');
+  var candyRow = $("#game_board").children()[info.candy.row];
+  var candyCell = $(candyRow).children()[info.candy.col];
+
+  var candyInfo = info.candy;
+  $(curCandy).data("candy", candyInfo);
+
+  var candyClass = info.candy.toString();
+  $(curCandy).addClass("candy-" + candyClass);
+
+  var candyId = info.candy.id;
+  $(curCandy).attr("id", candyId);
+
+  var pos = (String.fromCharCode(info.candy.col + 97)) + ((info.candy.row + 1).toString());
+  $(curCandy).attr("position", pos);
+  $(curCandy).append(pos);
+
+  candyCell.append(curCandy);
+});
+
+
+// move a candy on the board
+$(board).on('move', function(e, info)
+{
+  // Your code here.
+  var curCandy1 = document.getElementById(info.candy.id);
+  var curCandy2 = document.createElement('div');
+
+  var candyRow = $("#game_board").children()[info.candy.row];
+  var candyCell = $(candyRow).children()[info.candy.col];
+
+  var candyInfo = info.candy;
+  $(curCandy2).data("candy", candyInfo);
+
+  var candyClass = info.candy.toString();
+  $(curCandy2).addClass("candy-" + candyClass);
+
+  var candyId = info.candy.id;
+  $(curCandy2).attr("id", candyId);
+
+  var pos = (String.fromCharCode(info.candy.col + 97)) + ((info.candy.row + 1).toString());
+  $(curCandy2).attr("position", pos);
+  $(curCandy2).append(pos);
+
+  curCandy1.parentNode.removeChild(curCandy1);
+  candyCell.append(curCandy2);
+});
+
+
+// move a candy on the board
+$(board).on('move', function(e, info)
+{
+  // Your code here
+  var curCandy1 = document.getElementById(info.candy.id);
+  var curCandy2 = document.createElement('div');
+
+  var candyRow = $("#game_board").children()[info.candy.row];
+  var candyCell = $(candyRow).children()[info.candy.col];
+
+  var candyInfo = info.candy;
+  $(curCandy2).data("candy", candyInfo);
+
+  var candyClass = info.candy.toString();
+  $(curCandy2).addClass("candy-" + candyClass);
+
+  var candyId = info.candy.id;
+  $(curCandy2).attr("id", candyId);
+
+  var pos = (String.fromCharCode(97 + info.candy.col)) + ((info.candy.row + 1).toString());
+  $(curCandy2).attr("position", pos);
+  $(curCandy2).append(pos);
+
+  curCandy1.parentNode.removeChild(curCandy1);
+  candyCell.append(curCandy2);
+});
+
+// remove a candy from the board
+$(board).on('remove', function(e, info)
+{
+  // Your code here.
+  var removeCandy = document.getElementById(info.candy.id);
+  removeCandy.parentNode.removeChild(removeCandy);
+});
+
+
+
+
+// move a candy on the board
+$(board).on('scoreUpdate', function(e, info) { });
+
+
+// helper for button events
+function disable_button(buttonID){
+  if (buttonID == "all") {
+    disable_button("up")
+    disable_button("left")
+    disable_button("right")
+    disable_button("down")
+    disable_button("crush_once")
+  }
+
+  else {
+    document.getElementById(buttonID).disabled = true;
+  }
+}
+
+
+// helper for button events
+function enable_button(buttonID){
+  if (buttonID == "all") {
+    enable_button("up")
+    enable_button("left")
+    enable_button("right")
+    enable_button("down")
+    enable_button("crush_once")
+  }
+  else {
+   document.getElementById(buttonID).disabled = false;
+  }
+}
+
+// helper for button events
+function reset() {
+    disable_button("all")
+    enable_button("crush_once")
+}
+
+// Button Events
+$(document).on('click', ".btn", function(evt)
+{
+  // get input, check valid moves for that candy
+  var getMove = document.getElementById("toMoveInput");
+  var candy1 = $("div").find("[position='" + getMove.value + "']").data("candy");
+  getMove.value = ''
+
+  var buttonID = evt.target.id;
+
+  if (buttonID == "new_game") { startNewGame();}
+
+  if (buttonID == "up"){
+    board.flipCandies(candy1, board.getCandyInDirection(candy1, "up"));
+    reset();
+  }
+
+  if (buttonID == "down"){
+    board.flipCandies(candy1, board.getCandyInDirection(candy1, "down"));
+    reset();
+  }
+
+  if (buttonID == "left"){
+    board.flipCandies(candy1, board.getCandyInDirection(candy1, "left"));
+    reset();
+  }
+
+  if (buttonID == "right"){
+    board.flipCandies(candy1, board.getCandyInDirection(candy1, "right"));
+    reset();
+  }
+
+  if (buttonID == "crush_once"){
+    rules.removeCrushes(rules.getCandyCrushes());
+    rules.moveCandiesDown(); 
+  }
+
+  document.getElementById("toMoveInput").focus();
+});
+
+// keyboard events arrive here
+$(document).on('keydown', function(evt) { });
+
+
+// check valid of input from input text box
+function parser(){
+  var getMove = document.getElementById('toMoveInput');
+  disable_button("all");
+  if (getMove.value.length == 2){
+    console.log("user entered: " + getMove.value);
+    var input = getMove.value.toLowerCase();
+		var div = $("div").find("[position='" + input + "']");
+    var candy = div.data("candy");
+    if (candy !== undefined){
+      console.log(candy);
+      var directions = ["up", "down", "left", "right"];
+      for (var i = 0; i < directions.length; i++){
+        if(rules.isMoveTypeValid(candy, directions[i])){
+          console.log("Valid move " + directions[i]);
+          enable_button(directions[i])
+        }
+      }
+    }
+    else {
+      console.log("Invalid move");
+    }
+  }
+  else {
+    disable_button("all");
+  }
+
+  // moreToCrush();
+  if (rules.getCandyCrushes().length != 0){
+    enable_button("crush_once")
+  }
+  else {
+    disable_button("crush_once")
+    
+  }
+
+
+}
+
+
+
+</script>
+
+
+</head>
+
+<body>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-4" id="firstColumn">
+      <div>
+      <!-- Column 1 Code Here -->
+      <!-- Column 1 -->
+        <h1 id="candy_crush_title" style="text-align:center;" >Candy</h1>
+        <h1 id="candy_crush_title" style="text-align:center;" >Crush</h1>
+        <div>
+          <input type="button" class="btn btn-default" id="new_game" value="New Game"></input>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="col-md-4" id="mainColumn">
+
+      <!-- <br></br> -->
+      <!-- Column 2 Code Here -->
+      <!-- Column 2 -->
+      <table id="game_board"> </table>
+
+    </div>
+
+    <div class="col-md-4" id="lastColumn">
+
+      <!-- Column 3 Code Here -->
+      <form class="form-inline">
+        <div class="form-group " style="margin: auto;">
+          <label for="moveInput"style="font-weight: bold;font-size: medium;color: black;margin: auto;">MOVE:</label>
+          <input type="text" class="form-control" id="toMoveInput" maxlength="2" style="width: 50px;" onkeyup="parser()">
+        </div>
+      </form>
+
+      <div style="margin-top: 20px;">
+
+        <div>
+          <input type="button" class="btn btn-default arrow" id="up" value="↑"></input>
+        </div>
+
+        <div>
+          <input type="button" class="btn btn-default arrow" id="left" value="←"></input>
+          <input type="button" class="btn btn-default arrow" id="right" value="→" style="margin-left: 42px;"></input>
+        </div>
+
+        <div>
+          <input type="button" class="btn btn-default arrow" id="down" value="↓"></input>
+        </div>
+
+      </div>
+
+      <div style="margin-top: 20px;">
+        <input type="button" class="btn btn-default" id="crush_once" value="Crush Once"></input>
+      </div>
+
+    </div>
+  </div> <!-- class="row" -->
+</div> <!-- class="container" -->
+
+</body>
+
+</html>
